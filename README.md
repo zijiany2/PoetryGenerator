@@ -1,2 +1,2 @@
 # PoetryGen
-Chinese Poetry Generation
+Chinese Poetry Generation by Zijian Yao & Ran Li.

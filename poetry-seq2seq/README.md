@@ -3,6 +3,7 @@
 - To run server of couplets, use "python3 couplet_gen/seq_learning.py" with Tensorflow==1.0.0
 - To run client of s2s poetry generator, use "python2 cpython2 main.py" with Tensorflow==1.2.1. 
 - The model are empty now. Please make sure the models are stored in correct folders before evaluation; or train from empty.
+
 ** TODO list **
 Zijian: Update word embeddings for poetry with rhymes.
 Ran: Force rhymes of last character for couplet.

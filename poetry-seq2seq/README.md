@@ -1,3 +1,9 @@
+
+## New information
+- To run server of couplets, use "python3 couplet_gen/seq_learning.py" with Tensorflow==1.0.0
+- To run client of s2s poetry generator, use "python2 cpython2 main.py" with Tensorflow==1.2.1. 
+- The model are empty now. Please make sure the models are stored in correct folders before evaluation; or train from empty.
+
 # Chinese Poetry Generation
 This project aims to implement and improve upon the classical Chinese poetry generation system proposed in ["Chinese Poetry Generation with Planning based Neural Network"](https://arxiv.org/abs/1610.09889). 
 

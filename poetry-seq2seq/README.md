@@ -4,7 +4,7 @@
 - To run client of s2s poetry generator, use "python2 cpython2 main.py" with Tensorflow==1.2.1. 
 - The model are empty now. Please make sure the models are stored in correct folders before evaluation; or train from empty.
 
-** TODO list **
+**TODO list(2018/02/24)**
 Zijian: Update word embeddings for poetry with rhymes.
 Ran: Force rhymes of last character for couplet.
 

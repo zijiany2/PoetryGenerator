@@ -2,12 +2,13 @@
 #-*- coding:utf-8 -*-
 
 import os
-from utils import DATA_PROCESSED_DIR
+from utils import DATA_PROCESSED_DIR, WORD_EMBEDDING_RHYME_DIM, WORD_EMBEDDING_CONTEXT_DIM
 import numpy as np
-from vocab import get_vocab, VOCAB_SIZE
+from vocab import get_vocab
 from quatrains import get_quatrains
 from gensim import models
 from numpy.random import uniform
+from utils import get_rhyme_feature, VOCAB_SIZE
 
 _w2v_path = os.path.join(DATA_PROCESSED_DIR, 'word2vec.npy')
 _w2v_model_path = os.path.join(DATA_PROCESSED_DIR, 'word2vec.model')
@@ -16,6 +17,7 @@ _w2v_with_alignment_model_path = os.path.join(DATA_PROCESSED_DIR, 'word2vec_with
 
 def _gen_embedding(ndim, alignment=False):
     print "Generating %d-dim word embedding ..." %ndim
+    rhyme_dim = WORD_EMBEDDING_RHYME_DIM
     int2ch, ch2int = get_vocab()
     ch_lists = []
     quatrains = get_quatrains()
@@ -26,15 +28,19 @@ def _gen_embedding(ndim, alignment=False):
             # the i-th characters in the poem, used to boost Dui Zhang
             i_characters = [[sentence[j] for sentence in poem['sentences']] for j in range(len(poem['sentences'][0]))]
             for characters in i_characters:
-                ch_lists.append(filter(lambda ch: ch in ch2int, characters))
+                for i in range(len(characters))[::2]:
+                    ch_lists.append(filter(lambda ch: ch in ch2int, characters[i:i+2]))
         if 0 == (idx+1)%10000:
             print "[Word2Vec] %d/%d poems have been processed." %(idx+1, len(quatrains))
     print "Hold on. This may take some time ..."
-    model = models.Word2Vec(ch_lists, size = ndim, min_count = 5)
+    model = models.Word2Vec(ch_lists, size = ndim - rhyme_dim, min_count = 5)
+    print "Get word2vec model..."
     embedding = uniform(-1.0, 1.0, [VOCAB_SIZE, ndim])
     for idx, ch in enumerate(int2ch):
         if ch in model.wv:
-            embedding[idx,:] = model.wv[ch]
+            # times 0.5: make sure the embedding is normalized to 1
+            embedding[idx,:WORD_EMBEDDING_RHYME_DIM] = get_rhyme_feature(ch) * 0.5
+            embedding[idx,WORD_EMBEDDING_RHYME_DIM:] = model.wv[ch] * 0.5
     if alignment:
         model.save(_w2v_with_alignment_model_path)
         print "Word2Vec model is saved."
@@ -64,11 +70,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.alignment:
         print "Using Word2vec with alignment, use -h for usage"
-        embedding = get_word_embedding(128, alignment=True)
+        embedding = get_word_embedding(WORD_EMBEDDING_CONTEXT_DIM + WORD_EMBEDDING_RHYME_DIM, alignment=True)
         print "Finished loading Word2vec with alignment. Size of embedding: (%d, %d)" %embedding.shape
     else:
         print "Using Word2vec without alignment, use -h for usage"
-        embedding = get_word_embedding(128)
+        embedding = get_word_embedding(WORD_EMBEDDING_CONTEXT_DIM + WORD_EMBEDDING_RHYME_DIM)
         print "Finished loading Word2vec without alignment. Size of embedding: (%d, %d)" %embedding.shape
 
 

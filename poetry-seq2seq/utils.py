@@ -3,9 +3,11 @@
 
 import os
 
-VOCAB_SIZE = 6000
+VOCAB_SIZE = 5000
 SEP_TOKEN = 0
-PAD_TOKEN = 5999
+PAD_TOKEN = VOCAB_SIZE - 1
+WORD_EMBEDDING_RHYME_DIM = 115
+WORD_EMBEDDING_CONTEXT_DIM = 128 
 
 
 DATA_RAW_DIR = 'data/raw'
@@ -54,6 +56,18 @@ def uprintln(x):
 def is_CN_char(ch):
     return ch >= u'\u4e00' and ch <= u'\u9fa5'
 
+def get_rhyme_feature(ch):
+    import json
+    import numpy as np
+    rhyme_feature_path = os.path.join(DATA_RAW_DIR, 'rhyme_feature.json')
+    with open(rhyme_feature_path) as f:
+        rhyme_dict = json.load(f)
+    if ch in rhyme_dict:
+        return np.array(rhyme_dict[ch])
+    else:
+        x = np.random.standard_normal(115)
+        r = np.sqrt((x*x).sum())
+        return x / r
 
 def split_sentences(line):
     sentences = []

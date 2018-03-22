@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 import tensorflow as tf
 
-from utils import SEP_TOKEN, PAD_TOKEN, VOCAB_SIZE, MODEL_DIR
+from utils import SEP_TOKEN, PAD_TOKEN, VOCAB_SIZE, MODEL_DIR, WORD_EMBEDDING_CONTEXT_DIM, WORD_EMBEDDING_RHYME_DIM
 from data_utils import gen_batch_train_data
 from model import Seq2SeqModel
 from word2vec import get_word_embedding
@@ -24,9 +24,9 @@ tf.app.flags.DEFINE_boolean('align_word2vec', True, 'Use aligned word2vec model'
 # Network parameters
 tf.app.flags.DEFINE_string('cell_type', 'lstm', 'RNN cell for encoder and decoder, default: lstm')
 tf.app.flags.DEFINE_string('attention_type', 'bahdanau', 'Attention mechanism: (bahdanau, luong), default: bahdanau')
-tf.app.flags.DEFINE_integer('hidden_units', 128, 'Number of hidden units in each layer')
+tf.app.flags.DEFINE_integer('hidden_units', WORD_EMBEDDING_CONTEXT_DIM + WORD_EMBEDDING_RHYME_DIM, 'Number of hidden units in each layer')
 tf.app.flags.DEFINE_integer('depth', 4, 'Number of layers in each encoder and decoder')
-tf.app.flags.DEFINE_integer('embedding_size', 128, 'Embedding dimensions of encoder and decoder inputs')
+tf.app.flags.DEFINE_integer('embedding_size', WORD_EMBEDDING_CONTEXT_DIM + WORD_EMBEDDING_RHYME_DIM, 'Embedding dimensions of encoder and decoder inputs')
 tf.app.flags.DEFINE_integer('num_encoder_symbols', 30000, 'Source vocabulary size')
 tf.app.flags.DEFINE_integer('num_decoder_symbols', 30000, 'Target vocabulary size')
 # NOTE(sdsuo): We used the same vocab for source and target
@@ -104,6 +104,7 @@ def train():
 
         # Load word2vec embedding
         embedding = get_word_embedding(FLAGS.hidden_units, alignment=FLAGS.align_word2vec)
+        print(embedding.shape)
         model.init_vars(sess, embedding=embedding)
 
         step_time, loss = 0.0, 0.0

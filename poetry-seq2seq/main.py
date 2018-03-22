@@ -15,7 +15,7 @@ def get_cangtou_keywords(input):
     assert(len(input) == 4)
     return [c for c in input]
 
-def main(cangtou=False):
+def main(args, cangtou=False):
 
     planner = Planner()
     with Seq2SeqPredictor() as predictor:
@@ -37,7 +37,10 @@ def main(cangtou=False):
                         keywords = planner.plan(input)
 
                     # Generate poem
-                    lines = predictor.predict_with_couplet(keywords)
+                    if args.nocouplet:
+                        lines = predictor.predict(keywords)
+                    else:
+                        lines = predictor.predict_with_couplet(keywords)
 
                     # Print keywords and poem
                     print 'Keyword:\t\tPoem:'
@@ -57,4 +60,8 @@ def main(cangtou=False):
 
 
 if __name__ == '__main__':
-    main(cangtou=tf.app.flags.FLAGS.cangtou)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--nocouplet', help='No couplet', required=False)
+    args = parser.parse_args()
+    main(args, cangtou=tf.app.flags.FLAGS.cangtou)

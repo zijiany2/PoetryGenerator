@@ -49,24 +49,26 @@ def _gen_train_data():
             kw_row = []
             for sentence in sentences:
                 rows.append([sentence])
-                segs = filter(lambda seg: seg in ranks, segmenter.segment(sentence))
+                segs = filter(lambda seg: seg in ranks,
+                              segmenter.segment(sentence))
                 if 0 == len(segs):
                     flag = False
                     break
-                keyword = reduce(lambda x,y: x if ranks[x] < ranks[y] else y, segs)
+                keyword = reduce(lambda x, y: x if ranks[
+                                 x] < ranks[y] else y, segs)
                 kw_row.append(keyword)
                 rows[-1].append(keyword)
             if flag:
                 data.extend(rows)
                 kw_data.append(kw_row)
-        if 0 == (idx+1)%2000:
-            print "[Training Data] %d/%d poems are processed." %(idx+1, len(poems))
+        if 0 == (idx + 1) % 2000:
+            print "[Training Data] %d/%d poems are processed." % (idx + 1, len(poems))
     with codecs.open(train_path, 'w', 'utf-8') as fout:
         for row in data:
-            fout.write('\t'.join(row)+'\n')
+            fout.write('\t'.join(row) + '\n')
     with codecs.open(kw_train_path, 'w', 'utf-8') as fout:
         for kw_row in kw_data:
-            fout.write('\t'.join(kw_row)+'\n')
+            fout.write('\t'.join(kw_row) + '\n')
     print "Training data is generated."
 
 
@@ -79,7 +81,7 @@ def _gen_cangtou_train_data():
             for sentence in poem['sentences']:
                 fout.write(sentence + "\t" + sentence[0] + "\n")
             if 0 == (idx + 1) % 2000:
-                print "[Training Data] %d/%d poems are processed." %(idx+1, len(poems))
+                print "[Training Data] %d/%d poems are processed." % (idx + 1, len(poems))
     print "Cangtou training data is generated."
 
 
@@ -96,9 +98,10 @@ def get_train_data(cangtou=False):
         line = fin.readline()
         while line:
             toks = line.strip().split('\t')
-            data.append({'sentence':toks[0], 'keyword':toks[1]})
+            data.append({'sentence': toks[0], 'keyword': toks[1]})
             line = fin.readline()
     return data
+
 
 def get_kw_train_data():
     if not os.path.exists(kw_train_path):
@@ -140,20 +143,20 @@ def batch_train_data(batch_size):
                 else:
                     toks = line.strip().split('\t')
                     # NOTE(sdsuo): Removed start token
-                    batch_s[i%4].append([ch2int[ch] for ch in toks[0]])
-                    batch_kw[i%4].append([ch2int[ch] for ch in toks[1]])
+                    batch_s[i % 4].append([ch2int[ch] for ch in toks[0]])
+                    batch_kw[i % 4].append([ch2int[ch] for ch in toks[1]])
             if batch_size != len(batch_s[0]):
                 print 'Batch incomplete with size {}, expecting size {}, dropping batch.'.format(len(batch_s[0]), batch_size)
                 break
             else:
-                kw_mats = [fill_np_matrix(batch_kw[i], batch_size, VOCAB_SIZE-1) \
-                        for i in range(4)]
-                kw_lens = [fill_np_array(map(len, batch_kw[i]), batch_size, 0) \
-                        for i in range(4)]
-                s_mats = [fill_np_matrix(batch_s[i], batch_size, VOCAB_SIZE-1) \
-                        for i in range(4)]
-                s_lens = [fill_np_array([len(x) for x in batch_s[i]], batch_size, 0) \
-                        for i in range(4)]
+                kw_mats = [fill_np_matrix(batch_kw[i], batch_size, VOCAB_SIZE - 1)
+                           for i in range(4)]
+                kw_lens = [fill_np_array(map(len, batch_kw[i]), batch_size, 0)
+                           for i in range(4)]
+                s_mats = [fill_np_matrix(batch_s[i], batch_size, VOCAB_SIZE - 1)
+                          for i in range(4)]
+                s_lens = [fill_np_array([len(x) for x in batch_s[i]], batch_size, 0)
+                          for i in range(4)]
                 yield kw_mats, kw_lens, s_mats, s_lens
 
 
@@ -175,11 +178,13 @@ def prepare_batch_predict_data(keyword, previous=[], prev=True, rev=False, align
     # previous sentences
     previous_sentences_ints = []
     for sentence in previous:
-        sentence_ints = process_sentence(sentence, rev=rev, pad_len=7 if align else None)
+        sentence_ints = process_sentence(
+            sentence, rev=rev, pad_len=7 if align else None)
         previous_sentences_ints += [SEP_TOKEN] + sentence_ints
 
     # keywords
-    keywords_ints = process_sentence(keyword, rev=rev, pad_len=4 if align else None)
+    keywords_ints = process_sentence(
+        keyword, rev=rev, pad_len=4 if align else None)
 
     source_ints = keywords_ints + (previous_sentences_ints if prev else [])
     source_len = len(source_ints)
@@ -232,33 +237,49 @@ def gen_batch_train_data(batch_size, prev=True, rev=False, align=False, cangtou=
 
                     current_sentence, keywords = line.strip().split('\t')
 
-                    current_sentence_ints = process_sentence(current_sentence, rev=rev, pad_len=7 if align else None)
-                    keywords_ints = process_sentence(keywords, rev=rev, pad_len=4 if align else None)
-                    source_ints = keywords_ints + (previous_sentences_ints if prev else [])
+                    other_keywords = []
+                    if len(current_sentence) == 5:
+                        other_keywords = [current_sentence[
+                            :2], current_sentence[2:]]
+                    elif len(current_sentence) == 7:
+                        other_keywords = [current_sentence[
+                            :2], current_sentence[2:4], current_sentence[4:]]
 
-                    target.append(current_sentence_ints)
-                    target_lens.append(len(current_sentence_ints))
+                    current_sentence_ints = process_sentence(
+                        current_sentence, rev=rev, pad_len=7 if align else None)
 
-                    source.append(source_ints)
-                    source_lens.append(len(source_ints))
+                    other_keywords.append(keywords)
+                    all_keywords = other_keywords
+                    for keyword in all_keywords:
+                        keywords_ints = process_sentence(
+                            keyword, rev=rev, pad_len=4 if align else None)
+                        source_ints = keywords_ints + \
+                            (previous_sentences_ints if prev else [])
+
+                        target.append(current_sentence_ints)
+                        target_lens.append(len(current_sentence_ints))
+
+                        source.append(source_ints)
+                        source_lens.append(len(source_ints))
 
                     # Always append to previous sentences
-                    previous_sentences_ints += [SEP_TOKEN] + current_sentence_ints
+                    previous_sentences_ints += [SEP_TOKEN] + \
+                        current_sentence_ints
 
-            if len(source) == batch_size:
-                source_padded = fill_np_matrix(source, batch_size, PAD_TOKEN)
-                target_padded = fill_np_matrix(target, batch_size, PAD_TOKEN)
-                source_lens = np.array(source_lens)
-                target_lens = np.array(target_lens)
+            # if len(source) == batch_size:
+            source_padded = fill_np_matrix(source, len(source), PAD_TOKEN)
+            target_padded = fill_np_matrix(target, len(target), PAD_TOKEN)
+            source_lens = np.array(source_lens)
+            target_lens = np.array(target_lens)
 
-                yield source_padded, source_lens, target_padded, target_lens
+            yield source_padded, source_lens, target_padded, target_lens
 
 
 def main():
     train_data = get_train_data()
-    print "Size of the training data: %d" %len(train_data)
+    print "Size of the training data: %d" % len(train_data)
     kw_train_data = get_kw_train_data()
-    print "Size of the keyword training data: %d" %len(kw_train_data)
+    print "Size of the keyword training data: %d" % len(kw_train_data)
     assert len(train_data) == 4 * len(kw_train_data)
 
 

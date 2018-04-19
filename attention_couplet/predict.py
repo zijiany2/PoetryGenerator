@@ -159,18 +159,6 @@ class Seq2SeqPredictor:
 
         return sentences
 
-def main(_):
-    KEYWORDS = [
-        u'楚',
-        u'收拾',
-        u'思乡',
-        u'相随'
-    ]
-
-    with Seq2SeqPredictor() as predictor:
-        lines = predictor.predict(KEYWORDS)
-        for line in lines:
-            print line
 
 if __name__ == '__main__':
     tf.app.run()

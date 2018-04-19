@@ -33,30 +33,6 @@ def main(args, cangtou=False):
                     lines = predictor.predict(input)
                     print lines
 
-                #else:
-                #    if cangtou:
-                #        keywords = get_cangtou_keywords(input)
-                #    else:
-                #        # Generate keywords
-                #        keywords = planner.plan(input)
-
-                #    # Generate poem
-                #    if args.nocouplet:
-                #        lines = predictor.predict(keywords)
-                #    else:
-                #        lines = predictor.predict_with_couplet(keywords)
-
-                    
-                    # Print keywords and poem
-                    # print 'Keyword:\t\tPoem:'
-                    # for line_number in xrange(4):
-                    #     punctuation = u'，' if line_number % 2 == 0 else u'。'
-                    #     print u'{keyword}\t\t{line}{punctuation}'.format(
-                    #         keyword=keywords[line_number],
-                    #         line=lines[line_number],
-                    #         punctuation=punctuation
-                    #     )
-
             except EOFError:
                 terminate = True
             except KeyboardInterrupt:

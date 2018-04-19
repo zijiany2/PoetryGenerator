@@ -1,9 +1,7 @@
 #! /usr/bin/env python
 #-*- coding:utf-8 -*-
 
-# standard
 import os
-#from IPython import embed
 
 # framework
 import tensorflow as tf
@@ -81,7 +79,6 @@ class Seq2SeqModel:
         self.summary_op = tf.summary.merge_all()
 
     def init_placeholders(self):
-        # TODO(sdsuo): Understand dropout
         self.keep_prob_placeholder = tf.placeholder(self.dtype, shape=[], name='keep_prob')
 
         # embedding_placeholder: [vocab_size, hidden_units]
@@ -178,7 +175,6 @@ class Seq2SeqModel:
                 ids=self.encoder_inputs
             )
 
-            # TODO(sdsuo): Decide if we need a Dense input layer here
 
             if self.bidirectional:
                 # Build encoder cell
@@ -220,7 +216,6 @@ class Seq2SeqModel:
                 )
 
     def build_decoder_cell(self):
-        # TODO(sdsuo): Read up and decide whether to use beam search
         self.attention_mechanism = seq2seq.BahdanauAttention(
             num_units=self.decoder_hidden_units,
             memory=self.encoder_outputs,
@@ -231,7 +226,6 @@ class Seq2SeqModel:
             self.build_single_cell(self.decoder_hidden_units) for _ in range(self.depth)
         ]
 
-        # NOTE(sdsuo): Not sure what this does yet
         def attn_decoder_input_fn(inputs, attention):
             if not self.attn_input_feeding:
                 return inputs
@@ -241,7 +235,6 @@ class Seq2SeqModel:
                                  name='attn_input_feeding')
             return _input_layer(rnn.array_ops.concat([inputs, attention], -1))
 
-        # NOTE(sdsuo): Attention mechanism is implemented only on the top decoder layer
         self.decoder_cell_list[-1] = seq2seq.AttentionWrapper(
             cell=self.decoder_cell_list[-1],
             attention_mechanism=self.attention_mechanism,
@@ -252,7 +245,6 @@ class Seq2SeqModel:
             name='attention_wrapper'
         )
 
-        # NOTE(sdsuo): Not sure why this is necessary
         # To be compatible with AttentionWrapper, the encoder last state
         # of the top layer should be converted into the AttentionWrapperState form
         # We can easily do this by calling AttentionWrapper.zero_state
@@ -314,7 +306,6 @@ class Seq2SeqModel:
             maximum_iterations=max_decoder_length
         )
 
-        # NOTE(sdsuo): Not sure why this is necessary
         self.decoder_logits_train = tf.identity(self.decoder_outputs_train.rnn_output)
 
          # Use argmax to extract decoder symbols to emit
@@ -488,7 +479,6 @@ class Seq2SeqModel:
         input_feed = self.check_feeds(encoder_inputs, encoder_inputs_length,
                                       decoder_inputs, decoder_inputs_length, False)
 
-        # TODO(sdsuo): Understand keep prob
         input_feed[self.keep_prob_placeholder.name] = self.keep_prob
 
         output_feed = [
@@ -565,5 +555,4 @@ class Seq2SeqModel:
 
 if __name__ == '__main__':
     model = Seq2SeqModel()
-    #embed()
 

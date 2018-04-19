@@ -3,6 +3,7 @@
 
 #from plan import Planner
 from predict import Seq2SeqPredictor
+from rhymes import get_rhyme, rhyme_boosting
 import sys
 
 import tensorflow as tf
@@ -31,6 +32,8 @@ def main(args, cangtou=False):
                     terminate = True
                 else:
                     lines = predictor.predict(input)
+                    lines = lines.replace('UNK', '江')
+                    lines = lines[:-1] + rhyme_boosting(lines[-1], get_rhyme(input[-1]))
                     print lines
 
             except EOFError:

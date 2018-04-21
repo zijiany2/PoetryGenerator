@@ -2,6 +2,7 @@
 show.py
 data/processed/
 data/samples/
+data/
 save/
 model/
 log/

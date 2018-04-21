@@ -18,7 +18,7 @@ def get_cangtou_keywords(input):
     return [c for c in input]
 
 
-def main():
+def main(args):
 
     #planner = Planner()
     with Seq2SeqPredictor() as predictor:
@@ -39,8 +39,9 @@ def main():
 
             res = predictor.predict(input_from_client)
             res = res.replace('UNK', '江')
-            res = res[:-1] + \
-                rhyme_boosting(res[-1], get_rhyme(input_from_client[-1]))
+            if args.fixrhyme:
+                res = res[:-1] + \
+                    rhyme_boosting(res[-1], input_from_client[-1])
             print("Result of processing {} is: {}".format(input_from_client, res))
 
             vysl = res.encode("utf8")  # encode the result string
@@ -88,4 +89,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--fixrhyme', help='The rhyme of subsequent sentence is explicitly specified', required=False)
+    args = parser.parse_args()
+    main(args)

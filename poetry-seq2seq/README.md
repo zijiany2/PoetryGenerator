@@ -1,5 +1,5 @@
 ## New information(2018/04/21)
-- To run server of couplets, use "python2 attention_couplet/main.py" with Tensorflow==1.2.1
+- To run server of couplets, use "python2 attention_couplet/main.py [--fixrhyme=True]" with Tensorflow==1.2.1
 - To run client of s2s poetry generator, use "python2 main.py" with Tensorflow==1.2.1. 
 - The model are empty now. Please make sure the models are stored in correct folders before evaluation; or train from empty.
 

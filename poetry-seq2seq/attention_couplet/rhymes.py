@@ -10,14 +10,15 @@ def get_rhyme(ch):
 	return idx
 
 
-def rhyme_boosting(ch, rhyme):
+def rhyme_boosting(ch, rhyme_ch):
+	rhyme = get_rhyme(rhyme_ch)
 	ch = ch.decode('utf-8')
 	max_score = 0
 	max_ch = ch
 	for candidate in rhyme_dict:
 		if rhyme_dict[candidate][rhyme] >1e-5:
 			temp_score = compute_embedding_socre(ch, candidate) 
-			if temp_score > max_score: 
+			if temp_score > max_score and candidate != rhyme_ch.decode('utf-8'): 
 				max_score = temp_score
 				max_ch = candidate
 	return max_ch.encode('utf-8')

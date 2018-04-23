@@ -36,13 +36,15 @@ def main(args):
 
             # decode input and strip the end of line
             input_from_client = input_from_client_bytes.decode("utf8").rstrip()
+            ryhme_sentence, input_sentence = input_from_client[
+                :len(input_from_client) / 2], input_from_client[len(input_from_client) / 2:]
 
-            res = predictor.predict(input_from_client)
+            res = predictor.predict(input_sentence)
             res = res.replace('UNK', '江')
             if args.fixrhyme:
                 res = res[:-1] + \
-                    rhyme_boosting(res[-1], input_from_client[-1])
-            print("Result of processing {} is: {}".format(input_from_client, res))
+                    rhyme_boosting(res[-1], ryhme_sentence[-1])
+            print("Result of processing {} is: {}".format(input_sentence, res))
 
             vysl = res.encode("utf8")  # encode the result string
             conn.sendall(vysl)  # send it to client
@@ -91,6 +93,7 @@ def main(args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fixrhyme', help='The rhyme of subsequent sentence is explicitly specified', required=False)
+    parser.add_argument(
+        '--fixrhyme', help='The rhyme of subsequent sentence is explicitly specified', required=False)
     args = parser.parse_args()
     main(args)
